@@ -4,10 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="lisaaelokuva.css">
     <title>Lisää elokuva</title>
 </head>
 
 <body>
+
+    <header>
+        <a href="index.html">Etusivu</a>
+    </header>
+
     <form id="movieForm">
         <label for="moviename">Elokuvan nimi:</label><br>
         <input type="text" id="moviename" name="moviename"><br>
@@ -52,7 +58,11 @@
         <button type="button" onclick="displayMovieDetails()">Näytä elokuvan tiedot</button>
     </form>
 
-    <p id="output"></p>
+    <div id="output">
+        <div id="card">
+
+        </div>
+    </div>
 
     <script>
         function displayMovieDetails() {
@@ -66,21 +76,17 @@
             const rating = document.querySelector("#rating").value;
             const watched = document.querySelector('input[name="seen"]').checked ? "Kyllä" : "Ei";
 
-            document.querySelector("#output").innerHTML = `
-            <h2>Elokuvan tiedot:</h2>
-            <p><strong>Elokuvan nimi:</strong> ${movieName}</p>
-            <p><strong>Ohjaaja:</strong> ${director}</p>
-            <p><strong>Julkaisija:</strong> ${publisher}</p>
-            <p><strong>Julkaisupäivä:</strong> ${date}</p>
-            <p><strong>Julkaisumaa:</strong> ${country}</p>
-            <p><strong>Genre:</strong> ${genre}</p>
-            <p><strong>Tiivistelmä:</strong> ${synopsis}</p>
-            <p><strong>Arvostelu:</strong> ${rating} tähteä</p>
-            <p><strong>Nähty:</strong> ${watched}</p>
+            document.querySelector("#card").innerHTML = `
+            <p><strong> ${movieName}</strong></p>
+            <p><strong></strong> ${director}</p>
+            <p><strong></strong> ${publisher}</p>
+            <p>${country} - ${date} - ${genre}</p>
+            <p><strong></strong> ${synopsis}</p>
+            <p><strong></strong> ${rating} tähteä</p>
+            <p><strong></strong> ${watched}</p>
         `;
         }
     </script>
-
 
 </body>
 
