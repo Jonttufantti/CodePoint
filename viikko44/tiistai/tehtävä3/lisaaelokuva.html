@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lisää elokuva</title>
+</head>
+
+<body>
+    <form id="movieForm">
+        <label for="moviename">Elokuvan nimi:</label><br>
+        <input type="text" id="moviename" name="moviename"><br>
+
+        <label for="director">Ohjaajan nimi:</label><br>
+        <input type="text" id="director" name="director"><br>
+
+        <label for="publisher">Julkaisijan nimi:</label><br>
+        <input type="text" id="publisher" name="publisher"><br><br>
+
+        <label for="date">Julkaisupäivä:</label><br>
+        <input type="date" id="date" name="date"><br><br>
+
+        <label for="countries">Valitse julkaisumaa:</label><br>
+        <select name="countries" id="countries">
+            <option value="finland">Suomi</option>
+            <option value="us">Yhdysvallat</option>
+            <option value="hongkong">Hong Kong</option>
+            <option value="japan">Japani</option>
+        </select><br>
+
+        <p>Elokuvan genre?</p>
+        <input type="radio" id="action" name="genre" value="action">
+        <label for="action">Toiminta</label><br>
+
+        <input type="radio" id="comedy" name="genre" value="comedy">
+        <label for="comedy">Komedia</label><br>
+
+        <input type="radio" id="horror" name="genre" value="horror">
+        <label for="horror">Kauhu</label><br><br>
+
+        <label for="synopsis">Elokuvan tiivistelmä:</label><br>
+        <textarea id="synopsis" name="synopsis" rows="4" cols="50"></textarea><br>
+
+        <label for="rating">Arvostelu (1-5 tähteä):</label><br>
+        <input type="number" id="rating" name="rating" min="1" max="5"><br>
+
+        <p>Oletko nähnyt elokuvan?</p>
+        <input type="checkbox" id="seen" name="seen" value="yes">
+        <label for="seen"> Kyllä</label><br><br>
+
+        <button type="button" onclick="displayMovieDetails()">Näytä elokuvan tiedot</button>
+    </form>
+
+    <p id="output"></p>
+
+    <script>
+        function displayMovieDetails() {
+            const movieName = document.querySelector("#moviename").value;
+            const director = document.querySelector("#director").value;
+            const publisher = document.querySelector("#publisher").value;
+            const date = document.querySelector("#date").value;
+            const country = document.querySelector("#countries").value;
+            const genre = document.querySelector('input[name="genre"]:checked')?.value || "Ei valittu";
+            const synopsis = document.querySelector("#synopsis").value;
+            const rating = document.querySelector("#rating").value;
+            const watched = document.querySelector('input[name="seen"]').checked ? "Kyllä" : "Ei";
+
+            document.querySelector("#output").innerHTML = `
+            <h2>Elokuvan tiedot:</h2>
+            <p><strong>Elokuvan nimi:</strong> ${movieName}</p>
+            <p><strong>Ohjaaja:</strong> ${director}</p>
+            <p><strong>Julkaisija:</strong> ${publisher}</p>
+            <p><strong>Julkaisupäivä:</strong> ${date}</p>
+            <p><strong>Julkaisumaa:</strong> ${country}</p>
+            <p><strong>Genre:</strong> ${genre}</p>
+            <p><strong>Tiivistelmä:</strong> ${synopsis}</p>
+            <p><strong>Arvostelu:</strong> ${rating} tähteä</p>
+            <p><strong>Nähty:</strong> ${watched}</p>
+        `;
+        }
+    </script>
+
+
+</body>
+
+</html>
