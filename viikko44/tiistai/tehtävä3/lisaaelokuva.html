@@ -60,12 +60,14 @@
 
     <div id="output">
         <div id="card">
-
+            <div id="card-content"></div>
         </div>
     </div>
+    
 
     <script>
         function displayMovieDetails() {
+            
             const movieName = document.querySelector("#moviename").value;
             const director = document.querySelector("#director").value;
             const publisher = document.querySelector("#publisher").value;
@@ -74,16 +76,33 @@
             const genre = document.querySelector('input[name="genre"]:checked')?.value || "Ei valittu";
             const synopsis = document.querySelector("#synopsis").value;
             const rating = document.querySelector("#rating").value;
-            const watched = document.querySelector('input[name="seen"]').checked ? "Kyllä" : "Ei";
+            const watched = document.querySelector('input[name="seen"]').checked ? "✅" : "🟩";
+            const stars = "⭐".repeat(rating);
 
-            document.querySelector("#card").innerHTML = `
-            <p><strong> ${movieName}</strong></p>
-            <p><strong></strong> ${director}</p>
-            <p><strong></strong> ${publisher}</p>
-            <p>${country} - ${date} - ${genre}</p>
-            <p><strong></strong> ${synopsis}</p>
-            <p><strong></strong> ${rating} tähteä</p>
-            <p><strong></strong> ${watched}</p>
+            /* Testi tiedot
+            const movieName = "Star wars Episode IV - A New Hope";
+            const director = "George Lucas";
+            const publisher = "20th Century Fox";
+            const date = "30-05-1977";
+            const country = "USA";
+            const genre = "Science fiction";
+            const synopsis = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In blandit, nunc nec bibendum consequat, nisl est pretium neque, ut iaculis neque nisi eget magna. Nam cursus euismod interdum. Aenean laoreet massa tempus dictum mattis. Nunc eros nibh, facilisis nec mollis vitae, semper porta magna. Suspendisse eget accumsan ligula. Vivamus finibus eu neque nec interdum. Aliquam ac justo ligula. Proin eleifend erat ac nulla tincidunt tincidunt. Fusce placerat at nunc sed lacinia. Phasellus id libero blandit, consequat nulla ut, porta turpis. Aliquam libero arcu, dapibus quis eros vel, fringilla elementum dui. Nulla facilisi.";
+            const stars = "⭐⭐⭐⭐⭐";
+            */
+
+            document.querySelector("#card").style.display = "flex";
+
+            document.querySelector("#card-content").innerHTML = `
+            <p><strong> ${movieName}</strong> ${watched}</p>
+            <br>
+            <p> ${director}</p>
+            <p> ${publisher}</p>
+            <br>
+            <h7> ${country} - ${date} - ${genre}</h7>
+            <br>
+            <p> ${stars}</p>
+            <br>
+            <p> ${synopsis}</p>
         `;
         }
     </script>

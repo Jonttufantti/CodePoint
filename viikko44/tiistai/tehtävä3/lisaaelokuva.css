@@ -37,27 +37,30 @@ form {
 }
 
 #output {
-  padding: 20px;
   grid-area: card;
-  justify-content: space-around;
-  align-items: center;
-  display: flex;
   background-color: blanchedalmond;
+  padding: 20px;
 }
 
 #card {
-  justify-content: space-around;
-  align-items: center;
-  display: flex;
-} 
-
-.card h2 {
-  margin-bottom: 10px;
+  margin: 10px 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: white;
+  padding: 20px;
+  display: none;
+  width: 200px;
+  overflow: auto;
 }
 
-.card p {
-  margin: 5px 0;
+#card-content h6 {
+  font-size: medium;
 }
+
+#card-content h7 {
+  font-size: small;
+}
+
 
 footer {
   grid-area: footer;
