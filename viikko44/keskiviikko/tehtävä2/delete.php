@@ -12,7 +12,6 @@ try {
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Poistetaan tila
     if (isset($_POST['delete'])) {
         $id = $_POST['id'];
 
@@ -20,8 +19,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $conn->prepare("SELECT * FROM tilat WHERE id = :id");
         $stmt->bindParam(':id', $id);
         $stmt->execute();
+
         if ($stmt->rowCount() > 0) {
-            // Tila löytyy, poistetaan
+            // Tarkistetaan, onko tilalla aktiivisia varauksia
+            $checkReservations = $conn->prepare("SELECT * FROM varaukset WHERE tila = :id");
+            $checkReservations->bindParam(':id', $id);
+            $checkReservations->execute();
+
+            if ($checkReservations->rowCount() > 0) {
+                // Tila ei voi poistua, koska sillä on aktiivisia varauksia
+                header("Location: index.php?error=Tilaa ei voi poistaa, koska sillä on aktiivisia varauksia.");
+                exit;
+            }
+
+            // Poistetaan tila
             $stmt = $conn->prepare("DELETE FROM tilat WHERE id = :id");
             $stmt->bindParam(':id', $id);
             $stmt->execute();
@@ -33,8 +44,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $conn->prepare("SELECT * FROM varaajat WHERE id = :id");
         $stmt->bindParam(':id', $id);
         $stmt->execute();
+
         if ($stmt->rowCount() > 0) {
-            // Varaaja löytyy, poistetaan
+            // Tarkistetaan, onko varaajalla aktiivisia varauksia
+            $checkReservations = $conn->prepare("SELECT * FROM varaukset WHERE varaaja = :id");
+            $checkReservations->bindParam(':id', $id);
+            $checkReservations->execute();
+
+            if ($checkReservations->rowCount() > 0) {
+                // Varaaja ei voi poistua, koska sillä on aktiivisia varauksia
+                header("Location: index.php?error=Varaajaa ei voi poistaa, koska hänellä on aktiivisia varauksia.");
+                exit;
+            }
+
+            // Poistetaan varaaja
             $stmt = $conn->prepare("DELETE FROM varaajat WHERE id = :id");
             $stmt->bindParam(':id', $id);
             $stmt->execute();

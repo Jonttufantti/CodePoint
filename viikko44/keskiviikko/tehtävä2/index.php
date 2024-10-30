@@ -38,7 +38,8 @@
             varaajat ON varaukset.varaaja = varaajat.id
     ";
 
-    function nayta_taulukko($conn, $sql, $otsikot) {
+    function nayta_taulukko($conn, $sql, $otsikot)
+    {
         try {
             $query = $conn->prepare($sql);
             $query->execute();
@@ -70,6 +71,8 @@
             die("Query error: " . $e->getMessage());
         }
     }
+
+
 
     echo '<div class="taulukko-container">';
 
@@ -106,17 +109,17 @@
     echo '<form method="post" action="add.php">
         <select name="tila_id" required>
             <option value="">Valitse tila</option>';
-            $stmt = $conn->query("SELECT id, tilan_nimi FROM tilat");
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                echo "<option value='" . $row['id'] . "'>" . $row['tilan_nimi'] . "</option>";
-            }
+    $stmt = $conn->query("SELECT id, tilan_nimi FROM tilat");
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        echo "<option value='" . $row['id'] . "'>" . $row['tilan_nimi'] . "</option>";
+    }
     echo '</select>
         <select name="varaaja_id" required>
             <option value="">Valitse varaaja</option>';
-            $stmt = $conn->query("SELECT id, nimi FROM varaajat");
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                echo "<option value='" . $row['id'] . "'>" . $row['nimi'] . "</option>";
-            }
+    $stmt = $conn->query("SELECT id, nimi FROM varaajat");
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        echo "<option value='" . $row['id'] . "'>" . $row['nimi'] . "</option>";
+    }
     echo '</select>
         <input type="date" name="varauspaiva" required>
         <button type="submit" name="add_varaus">Lisää varaus</button>
@@ -124,7 +127,30 @@
     echo '</div>';
 
     echo '</div>';
+
+    // Viestien näyttäminen
+    if (isset($_GET['message'])) {
+        echo "<p id='success-message' style='color: green;'>".$_GET['message']."</p>";
+    }
+
+    if (isset($_GET['error'])) {
+        echo "<p id='error-message' style='color: red;'>".$_GET['error']."</p>";
+    }
     ?>
+
+    <script>
+        // Ajastin viestien piilottamiseksi
+        setTimeout(function() {
+            var successMessage = document.getElementById('success-message');
+            var errorMessage = document.getElementById('error-message');
+            if (successMessage) {
+                successMessage.style.display = 'none';
+            }
+            if (errorMessage) {
+                errorMessage.style.display = 'none';
+            }
+        }, 5000); // 5000 ms = 5 seconds
+    </script>
 </body>
 
 </html>
