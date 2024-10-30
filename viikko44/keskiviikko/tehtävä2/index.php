@@ -48,6 +48,7 @@
             foreach ($otsikot as $otsikko) {
                 echo "<th>$otsikko</th>";
             }
+            echo "<th>Poista</th>"; // Lisää tämä rivi
             echo "</tr>";
 
             foreach ($result as $row) {
@@ -55,6 +56,13 @@
                 foreach ($row as $cell) {
                     echo "<td>$cell</td>";
                 }
+                // Lisää poistopainike
+                echo "<td>
+                    <form method='post' action='delete.php'>
+                        <input type='hidden' name='id' value='" . $row['id'] . "'>
+                        <button type='submit' name='delete'>Poista</button>
+                    </form>
+                </td>";
                 echo "</tr>";
             }
             echo "</table><br>";
