@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
     <title>Tietokantatiedot</title>
-
 </head>
 
 <body>
@@ -64,86 +63,60 @@
         }
     }
 
-echo '<div class="taulukko-container">';
+    echo '<div class="taulukko-container">';
 
-echo '<div class="taulukko">';
-echo "<h2>Tilat</h2>";
-nayta_taulukko($conn, $sql_tilat, ["ID", "Tilan nimi"]);
+    // Tila-taulukko
+    echo '<div class="taulukko">';
+    echo "<h2>Tilat</h2>";
+    nayta_taulukko($conn, $sql_tilat, ["ID", "Tilan nimi"]);
 
-echo '<h3>Lisää uusi tila</h3>';
-echo '<form method="post" action="">
-    <input type="text" name="tilan_nimi" placeholder="Tilan nimi" required>
-    <button type="submit" name="add_tila">Lisää tila</button>
-</form>';
-echo '</div>';
+    echo '<h3>Lisää uusi tila</h3>';
+    echo '<form method="post" action="add.php">
+        <input type="text" name="tilan_nimi" placeholder="Tilan nimi" required>
+        <button type="submit" name="add_tila">Lisää tila</button>
+    </form>';
+    echo '</div>';
 
-echo '<div class="taulukko">';
-echo "<h2>Varaajat</h2>";
-nayta_taulukko($conn, $sql_varaajat, ["ID", "Nimi"]);
+    // Varaaja-taulukko
+    echo '<div class="taulukko">';
+    echo "<h2>Varaajat</h2>";
+    nayta_taulukko($conn, $sql_varaajat, ["ID", "Nimi"]);
 
-echo '<h3>Lisää uusi varaaja</h3>';
-echo '<form method="post" action="">
-    <input type="text" name="varaaja_nimi" placeholder="Varaajan nimi" required>
-    <button type="submit" name="add_varaaja">Lisää varaaja</button>
-</form>';
-echo '</div>';
+    echo '<h3>Lisää uusi varaaja</h3>';
+    echo '<form method="post" action="add.php">
+        <input type="text" name="varaaja_nimi" placeholder="Varaajan nimi" required>
+        <button type="submit" name="add_varaaja">Lisää varaaja</button>
+    </form>';
+    echo '</div>';
 
-echo '<div class="taulukko">';
-echo "<h2>Varaukset</h2>";
-nayta_taulukko($conn, $sql_varaukset, ["ID", "Tila", "Varaaja", "Varauspäivä"]);
+    // Varaukset-taulukko
+    echo '<div class="taulukko">';
+    echo "<h2>Varaukset</h2>";
+    nayta_taulukko($conn, $sql_varaukset, ["ID", "Tila", "Varaaja", "Varauspäivä"]);
 
-echo '<h3>Lisää uusi varaus</h3>';
-echo '<form method="post" action="">
-    <input type="number" name="varaus_tila" placeholder="Tila ID" required>
-    <input type="number" name="varaus_varaaja" placeholder="Varaaja ID" required>
-    <input type="date" name="varauspaiva" required>
-    <button type="submit" name="add_varaus">Lisää varaus</button>
-</form>';
-echo '</div>';
+    echo '<h3>Lisää uusi varaus</h3>';
+    echo '<form method="post" action="add.php">
+        <select name="tila_id" required>
+            <option value="">Valitse tila</option>';
+            $stmt = $conn->query("SELECT id, tilan_nimi FROM tilat");
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                echo "<option value='" . $row['id'] . "'>" . $row['tilan_nimi'] . "</option>";
+            }
+    echo '</select>
+        <select name="varaaja_id" required>
+            <option value="">Valitse varaaja</option>';
+            $stmt = $conn->query("SELECT id, nimi FROM varaajat");
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                echo "<option value='" . $row['id'] . "'>" . $row['nimi'] . "</option>";
+            }
+    echo '</select>
+        <input type="date" name="varauspaiva" required>
+        <button type="submit" name="add_varaus">Lisää varaus</button>
+    </form>';
+    echo '</div>';
 
-echo '</div>';
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Lisää tila
-    if (isset($_POST['add_tila'])) {
-        $tilan_nimi = $_POST['tilan_nimi'];
-        $stmt = $conn->prepare("INSERT INTO tilat (tilan_nimi) VALUES (:tilan_nimi)");
-        $stmt->bindParam(':tilan_nimi', $tilan_nimi);
-        $stmt->execute();
-        echo "<p>Tila '$tilan_nimi' lisätty.</p>";
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit; 
-    }
-
-    // Lisää varaaja
-    if (isset($_POST['add_varaaja'])) {
-        $varaaja_nimi = $_POST['varaaja_nimi'];
-        $stmt = $conn->prepare("INSERT INTO varaajat (nimi) VALUES (:varaaja_nimi)");
-        $stmt->bindParam(':varaaja_nimi', $varaaja_nimi);
-        $stmt->execute();
-        echo "<p>Varaaja '$varaaja_nimi' lisätty.</p>";
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit; 
-    }
-
-    // Lisää varaus
-    if (isset($_POST['add_varaus'])) {
-        $varaus_tila = $_POST['varaus_tila'];
-        $varaus_varaaja = $_POST['varaus_varaaja'];
-        $varauspaiva = $_POST['varauspaiva'];
-        $stmt = $conn->prepare("INSERT INTO varaukset (tila, varaaja, varauspaiva) VALUES (:tila, :varaaja, :varauspaiva)");
-        $stmt->bindParam(':tila', $varaus_tila);
-        $stmt->bindParam(':varaaja', $varaus_varaaja);
-        $stmt->bindParam(':varauspaiva', $varauspaiva);
-        $stmt->execute();
-        echo "<p>Varaus lisätty.</p>";
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit; 
-    }
-}
-?>
-
-
+    echo '</div>';
+    ?>
 </body>
 
 </html>
