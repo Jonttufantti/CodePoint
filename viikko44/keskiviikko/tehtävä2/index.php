@@ -38,6 +38,15 @@
             varaajat ON varaukset.varaaja = varaajat.id
     ";
 
+    // Viestien näyttäminen
+    if (isset($_GET['message'])) {
+        echo "<p id='success-message' style='color: green;'>" . $_GET['message'] . "</p>";
+    }
+
+    if (isset($_GET['error'])) {
+        echo "<p id='error-message' style='color: red;'>" . $_GET['error'] . "</p>";
+    }
+
     function nayta_taulukko($conn, $sql, $otsikot)
     {
         try {
@@ -49,7 +58,6 @@
             foreach ($otsikot as $otsikko) {
                 echo "<th>$otsikko</th>";
             }
-            echo "<th>Poista</th>"; // Lisää tämä rivi
             echo "</tr>";
 
             foreach ($result as $row) {
@@ -57,13 +65,13 @@
                 foreach ($row as $cell) {
                     echo "<td>$cell</td>";
                 }
-                // Lisää poistopainike
-                echo "<td>
-                    <form method='post' action='delete.php'>
-                        <input type='hidden' name='id' value='" . $row['id'] . "'>
-                        <button type='submit' name='delete'>Poista</button>
+                
+                echo '<td style="text-align: center;">
+                    <form method="post" action="delete.php">
+                        <input type="hidden" name="id" value="' . $row['id'] . '">
+                        <button type="submit" name="delete">Poista</button>
                     </form>
-                </td>";
+                </td>';
                 echo "</tr>";
             }
             echo "</table><br>";
@@ -72,85 +80,89 @@
         }
     }
 
-
-
+    // Taulukot
     echo '<div class="taulukko-container">';
 
-    // Tila-taulukko
     echo '<div class="taulukko">';
     echo "<h2>Tilat</h2>";
-    nayta_taulukko($conn, $sql_tilat, ["ID", "Tilan nimi"]);
-
-    echo '<h3>Lisää uusi tila</h3>';
-    echo '<form method="post" action="add.php">
-        <input type="text" name="tilan_nimi" placeholder="Tilan nimi" required>
-        <button type="submit" name="add_tila">Lisää tila</button>
-    </form>';
+    nayta_taulukko($conn, $sql_tilat, ["ID", "Tilan nimi", "Toiminnot"]);
     echo '</div>';
 
-    // Varaaja-taulukko
     echo '<div class="taulukko">';
     echo "<h2>Varaajat</h2>";
-    nayta_taulukko($conn, $sql_varaajat, ["ID", "Nimi"]);
-
-    echo '<h3>Lisää uusi varaaja</h3>';
-    echo '<form method="post" action="add.php">
-        <input type="text" name="varaaja_nimi" placeholder="Varaajan nimi" required>
-        <button type="submit" name="add_varaaja">Lisää varaaja</button>
-    </form>';
+    nayta_taulukko($conn, $sql_varaajat, ["ID", "Nimi", "Toiminnot"]);
     echo '</div>';
 
-    // Varaukset-taulukko
     echo '<div class="taulukko">';
     echo "<h2>Varaukset</h2>";
-    nayta_taulukko($conn, $sql_varaukset, ["ID", "Tila", "Varaaja", "Varauspäivä"]);
-
-    echo '<h3>Lisää uusi varaus</h3>';
-    echo '<form method="post" action="add.php">
-        <select name="tila_id" required>
-            <option value="">Valitse tila</option>';
-    $stmt = $conn->query("SELECT id, tilan_nimi FROM tilat");
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo "<option value='" . $row['id'] . "'>" . $row['tilan_nimi'] . "</option>";
-    }
-    echo '</select>
-        <select name="varaaja_id" required>
-            <option value="">Valitse varaaja</option>';
-    $stmt = $conn->query("SELECT id, nimi FROM varaajat");
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo "<option value='" . $row['id'] . "'>" . $row['nimi'] . "</option>";
-    }
-    echo '</select>
-        <input type="date" name="varauspaiva" required>
-        <button type="submit" name="add_varaus">Lisää varaus</button>
-    </form>';
+    nayta_taulukko($conn, $sql_varaukset, ["ID", "Tila", "Varaaja", "Varauspäivä", "Toiminnot"]);
     echo '</div>';
 
     echo '</div>';
 
-    // Viestien näyttäminen
-    if (isset($_GET['message'])) {
-        echo "<p id='success-message' style='color: green;'>".$_GET['message']."</p>";
-    }
+    
 
-    if (isset($_GET['error'])) {
-        echo "<p id='error-message' style='color: red;'>".$_GET['error']."</p>";
-    }
     ?>
 
     <script>
-        // Ajastin viestien piilottamiseksi
-        setTimeout(function() {
-            var successMessage = document.getElementById('success-message');
-            var errorMessage = document.getElementById('error-message');
+        // Aseta timeri viestien piilottamiseksi
+        setTimeout(function () {
+            let successMessage = document.querySelector('success-message');
+            let errorMessage = document.querySelector('error-message');
             if (successMessage) {
                 successMessage.style.display = 'none';
             }
             if (errorMessage) {
                 errorMessage.style.display = 'none';
             }
-        }, 5000); // 5000 ms = 5 seconds
+        }, 2000); // 1000 ms = 1 second
     </script>
+
+    <footer>
+        <div class="footer-form">
+            <div>
+                <h3>Lisää uusi tila</h3>
+                <form method="post" action="add.php">
+                    <input type="text" name="tilan_nimi" placeholder="Tilan nimi" required>
+                    <button type="submit" name="add_tila">Lisää tila</button>
+                </form>
+            </div>
+            <div>
+                <h3>Lisää uusi varaaja</h3>
+                <form method="post" action="add.php">
+                    <input type="text" name="varaaja_nimi" placeholder="Varaajan nimi" required>
+                    <button type="submit" name="add_varaaja">Lisää varaaja</button>
+                </form>
+            </div>
+            <div>
+                <h3>Lisää uusi varaus</h3>
+                <form method="post" action="add.php">
+                    <select name="tila_id" required>
+                        <option value="">Valitse tila</option>
+                        <?php
+                        // Hae tilat tietokannasta
+                        $stmt = $conn->query("SELECT id, tilan_nimi FROM tilat");
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            echo "<option value='" . $row['id'] . "'>" . $row['tilan_nimi'] . "</option>";
+                        }
+                        ?>
+                    </select>
+                    <select name="varaaja_id" required>
+                        <option value="">Valitse varaaja</option>
+                        <?php
+                        // Hae varaajat tietokannasta
+                        $stmt = $conn->query("SELECT id, nimi FROM varaajat");
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            echo "<option value='" . $row['id'] . "'>" . $row['nimi'] . "</option>";
+                        }
+                        ?>
+                    </select>
+                    <input type="date" name="varauspaiva" required>
+                    <button type="submit" name="add_varaus">Lisää varaus</button>
+                </form>
+            </div>
+        </div>
+    </footer>
 </body>
 
 </html>
