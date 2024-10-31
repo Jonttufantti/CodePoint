@@ -6,9 +6,9 @@ conn = sqlite3.connect('my_database.sqlite')
 cursor = conn.cursor()
 
 # SQL queries
-SQL_TILAT = "SELECT * FROM tilat"
-SQL_VARAAJAT = "SELECT * FROM varaajat"
-SQL_VARAUKSET = """
+sql_tilat = "SELECT * FROM tilat"
+sql_varaajat = "SELECT * FROM varaajat"
+sql_varaukset = """
     SELECT 
         varaukset.id,
         tilat.tilan_nimi AS tila,
@@ -23,13 +23,13 @@ SQL_VARAUKSET = """
 """
 
 # Execute queries and fetch results
-cursor.execute(SQL_TILAT)
+cursor.execute(sql_tilat)
 tilat_rows = cursor.fetchall()
 
-cursor.execute(SQL_VARAAJAT)
+cursor.execute(sql_varaajat)
 varaajat_rows = cursor.fetchall()
 
-cursor.execute(SQL_VARAUKSET)
+cursor.execute(sql_varaukset)
 varaukset_rows = cursor.fetchall()
 
 # Display tables side by side
