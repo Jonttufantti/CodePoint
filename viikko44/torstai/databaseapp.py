@@ -29,37 +29,66 @@ def display_tables(cursor):
     varaukset_rows = cursor.fetchall()
 
     # Display tables
-    print("\nTilat Table:")
+    print("\nTilat:")
     print(tabulate(tilat_rows, headers=["ID", "Tilan Nimi"], tablefmt="grid"))
 
-    print("\nVaraajat Table:")
+    print("\nVaraajat:")
     print(tabulate(varaajat_rows, headers=["ID", "Nimi"], tablefmt="grid"))
 
-    print("\nVaraukset Table:")
+    print("\nVaraukset:")
     print(tabulate(varaukset_rows, headers=["ID", "Tila", "Varaaja", "Varauspäivä"], tablefmt="grid"))
 
 def add_tila(cursor, conn):
-    tila_nimi = input("Enter the name of the new tila: ")
+    tila_nimi = input("Nimeä uusi tila: ")
     cursor.execute("INSERT INTO tilat (tilan_nimi) VALUES (?)", (tila_nimi,))
     conn.commit()
-    print("New tila added.")
+    print("Uusi tila lisätty.")
 
 def add_varaaja(cursor, conn):
-    varaaja_nimi = input("Enter the name of the new varaaja: ")
+    varaaja_nimi = input("Nimeä uusi varaaja: ")
     cursor.execute("INSERT INTO varaajat (nimi) VALUES (?)", (varaaja_nimi,))
     conn.commit()
-    print("New varaaja added.")
+    print("Uusi varaaja lisätty.")
 
 def add_varaus(cursor, conn):
-    tila_id = input("Enter the ID of the tila: ")
-    varaaja_id = input("Enter the ID of the varaaja: ")
-    varauspaiva = input("Enter the reservation date (YYYY-MM-DD): ")
+    tila_id = input("Syötä tilan ID: ")
+    varaaja_id = input("Syötä varaajan ID: ")
+    varauspaiva = input("Syötä varauspäivämäärä (YYYY-MM-DD): ")
     cursor.execute("INSERT INTO varaukset (tila, varaaja, varauspaiva) VALUES (?, ?, ?)", (tila_id, varaaja_id, varauspaiva))
     conn.commit()
-    print("New varaus added.")
+    print("Uusi varaus lisätty.")
 
 def delete_entry(cursor, conn, table_name):
-    entry_id = input(f"Enter the ID of the {table_name} to delete: ")
+    
+    # Check for existing bookings
+    if table_name == 'tilat':
+        entry_id = input(f"Syötä poistettavan tilan ID: ")
+        cursor.execute("SELECT COUNT(*) FROM varaukset WHERE tila = ?", (entry_id,))
+        has_booking = cursor.fetchone()[0]
+    elif table_name == 'varaajat':
+        entry_id = input(f"Syötä poistettavan varaajan ID: ")
+        cursor.execute("SELECT COUNT(*) FROM varaukset WHERE varaaja = ?", (entry_id,))
+        has_booking = cursor.fetchone()[0]
+        print(has_booking)
+    elif table_name == 'varaukset':
+        entry_id = input(f"Syötä poistettavan varauksen ID: ")
+        cursor.execute(f"DELETE FROM {table_name} WHERE id = ?", (entry_id,))
+        has_booking = 0
+
+    else:
+        print("Taulua ei löytynyt.")
+        return
+
+    if has_booking > 0:
+        confirm = input(f"This {table_name[:-1]} has existing bookings. Are you sure you want to delete it? (y/n): ")
+        if confirm.lower() != 'y':
+            print("Poistaminen peruutettu.")
+            return
+        else:
+            # Delete associated bookings first
+            cursor.execute("DELETE FROM varaukset WHERE " + ("tila" if table_name == 'tilat' else "varaaja") + " = ?", (entry_id,))
+            print(f"All bookings associated with this {table_name[:-1]} have been deleted.")
+
 
     cursor.execute(f"DELETE FROM {table_name} WHERE id = ?", (entry_id,))
     conn.commit()
@@ -71,17 +100,17 @@ def main():
     cursor = conn.cursor()
 
     while True:
-        print("\nOptions:")
-        print("1. Display Tables")
-        print("2. Add Tila")
-        print("3. Add Varaaja")
-        print("4. Add Varauksen")
-        print("5. Delete Tila")
-        print("6. Delete Varaaja")
-        print("7. Delete Varauksen")
+        print("\nVaihtoehdot:")
+        print("1. Näytä taulut")
+        print("2. Lisää tila")
+        print("3. Lisää varaaja")
+        print("4. Tee varaus")
+        print("5. Poisto tila")
+        print("6. Poista varaaja")
+        print("7. Poista varaus")
         print("8. Exit")
 
-        choice = input("Enter your choice: ")
+        choice = input("Tee valinta: ")
 
         if choice == '1':
             display_tables(cursor)
@@ -100,7 +129,7 @@ def main():
         elif choice == '8':
             break
         else:
-            print("Invalid choice. Please try again.")
+            print("Virheellinen valinta. Yritä uudelleen.")
 
     # Close connection
     conn.close()
