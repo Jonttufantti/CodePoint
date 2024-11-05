@@ -1,95 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Database Tables</title>
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Database Tables</h1>
     <h2>Tilat</h2>
     <table id="tilat-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Tilan Nimi</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Tilan data will be inserted here -->
-        </tbody>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tilan Nimi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
     </table>
 
     <h2>Varaajat</h2>
     <table id="varaajat-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nimi</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Varaaja data will be inserted here -->
-        </tbody>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nimi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
     </table>
 
     <h2>Varaukset</h2>
     <table id="varaukset-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Tila</th>
-                <th>Varaaja</th>
-                <th>Varauspäivä</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Varaukset data will be inserted here -->
-        </tbody>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tila</th>
+          <th>Varaaja</th>
+          <th>Varauspäivä</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
     </table>
+    <h2>Add Tila</h2>
+    <form id="add-tila-form">
+      <input type="text" id="new-tila" placeholder="Tilan Nimi" required />
+      <button type="submit">Add Tila</button>
+    </form>
+
+    <h2>Add Varaaja</h2>
+    <form id="add-varaa-form">
+      <input type="text" id="new-varaa" placeholder="Nimi" required />
+      <button type="submit">Add Varaaja</button>
+    </form>
+
+    <h2>Delete Tila</h2>
+    <input type="number" id="delete-tila-id" placeholder="Tilan ID" required />
+    <button id="delete-tila">Delete Tila</button>
+
+    <h2>Delete Varaaja</h2>
+    <input
+      type="number"
+      id="delete-varaa-id"
+      placeholder="Varaaja ID"
+      required
+    />
+    <button id="delete-varaa">Delete Varaaja</button>
 
     <script>
-        // Fetch data from the server
-        fetch('/data')
-            .then(response => response.json())
-            .then(data => {
-                const tilatBody = document.getElementById('tilat-table').getElementsByTagName('tbody')[0];
-                data.tilat.forEach(tila => {
-                    const row = tilatBody.insertRow();
-                    row.insertCell(0).textContent = tila.id;
-                    row.insertCell(1).textContent = tila.tilan_nimi;
-                });
+      // Fetch data from the server
+      fetch("/data")
+        .then((response) => response.json())
+        .then((data) => {
+          const tilatBody = document
+            .getElementById("tilat-table")
+            .getElementsByTagName("tbody")[0];
+          data.tilat.forEach((tila) => {
+            const row = tilatBody.insertRow();
+            row.insertCell(0).textContent = tila.id;
+            row.insertCell(1).textContent = tila.tilan_nimi;
+          });
 
-                const varaajatBody = document.getElementById('varaajat-table').getElementsByTagName('tbody')[0];
-                data.varaajat.forEach(varaaja => {
-                    const row = varaajatBody.insertRow();
-                    row.insertCell(0).textContent = varaaja.id;
-                    row.insertCell(1).textContent = varaaja.nimi;
-                });
+          const varaajatBody = document
+            .getElementById("varaajat-table")
+            .getElementsByTagName("tbody")[0];
+          data.varaajat.forEach((varaaja) => {
+            const row = varaajatBody.insertRow();
+            row.insertCell(0).textContent = varaaja.id;
+            row.insertCell(1).textContent = varaaja.nimi;
+          });
 
-                const varauksetBody = document.getElementById('varaukset-table').getElementsByTagName('tbody')[0];
-                data.varaukset.forEach(varaus => {
-                    const row = varauksetBody.insertRow();
-                    row.insertCell(0).textContent = varaus.id;
-                    row.insertCell(1).textContent = varaus.tila;
-                    row.insertCell(2).textContent = varaus.varaaja;
-                    row.insertCell(3).textContent = varaus.varauspaiva;
-                });
+          const varauksetBody = document
+            .getElementById("varaukset-table")
+            .getElementsByTagName("tbody")[0];
+          data.varaukset.forEach((varaus) => {
+            const row = varauksetBody.insertRow();
+            row.insertCell(0).textContent = varaus.id;
+            row.insertCell(1).textContent = varaus.tila;
+            row.insertCell(2).textContent = varaus.varaaja;
+            row.insertCell(3).textContent = varaus.varauspaiva;
+          });
+        });
+
+      document
+        .getElementById("add-tila-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const tila = document.getElementById("new-tila").value;
+          fetch("/add_tila", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tilan_nimi: tila }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              location.reload(); // Reload to see changes
             });
+        });
+
+      document
+        .getElementById("add-varaa-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const varaaja = document.getElementById("new-varaa").value;
+          fetch("/add_varaaja", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nimi: varaaja }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              location.reload(); // Reload to see changes
+            });
+        });
+
+      document
+        .getElementById("delete-tila")
+        .addEventListener("click", function () {
+          const tilaId = document.getElementById("delete-tila-id").value;
+          fetch("/delete_tila", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: tilaId }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              if (data.warning) {
+                alert(data.warning);
+              }
+              location.reload(); // Reload to see changes
+            });
+        });
+
+      document
+        .getElementById("delete-varaa")
+        .addEventListener("click", function () {
+          const varaajaId = document.getElementById("delete-varaa-id").value;
+          fetch("/delete_varaaja", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: varaajaId }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              if (data.warning) {
+                alert(data.warning);
+              }
+              location.reload(); // Reload to see changes
+            });
+        });
     </script>
-</body>
+  </body>
 </html>

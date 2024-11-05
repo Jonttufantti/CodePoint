@@ -50,3 +50,47 @@ def fetch_varaukset():
     cursor.close()
     conn.close()
     return varaukset
+
+def add_tila(tilan_nimi):
+    conn = mysql.connector.connect(**DB_CONFIG)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO tilat (tilan_nimi) VALUES (%s)", (tilan_nimi,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def add_varaaja(nimi):
+    conn = mysql.connector.connect(**DB_CONFIG)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO varaajat (nimi) VALUES (%s)", (nimi,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def delete_tila(id):
+    conn = mysql.connector.connect(**DB_CONFIG)
+    cursor = conn.cursor()
+    # Check if there are any existing varaukset for the tila
+    cursor.execute("SELECT COUNT(*) FROM varaukset WHERE tila = %s", (id,))
+    count = cursor.fetchone()[0]
+    if count > 0:
+        return "Warning: Deleting this tila will also delete any associated varaus."
+    cursor.execute("DELETE FROM tilat WHERE id = %s", (id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return None
+
+def delete_varaaja(id):
+    conn = mysql.connector.connect(**DB_CONFIG)
+    cursor = conn.cursor()
+    # Check if there are any existing varaukset for the varaaja
+    cursor.execute("SELECT COUNT(*) FROM varaukset WHERE varaaja = %s", (id,))
+    count = cursor.fetchone()[0]
+    if count > 0:
+        return "Warning: Deleting this varaaja will also delete any associated varaus."
+    cursor.execute("DELETE FROM varaajat WHERE id = %s", (id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return None
