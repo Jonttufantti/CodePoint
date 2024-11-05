@@ -67,30 +67,65 @@ def add_varaaja(nimi):
     cursor.close()
     conn.close()
 
-def delete_tila(id):
+def add_varaus(tila_id, varaaja_id, varauspaiva):
     conn = mysql.connector.connect(**DB_CONFIG)
     cursor = conn.cursor()
-    # Check if there are any existing varaukset for the tila
+    cursor.execute(
+        "INSERT INTO varaukset (tila, varaaja, varauspaiva) VALUES (%s, %s, %s)",
+        (tila_id, varaaja_id, varauspaiva)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def delete_tila(id, force=False):
+    conn = mysql.connector.connect(**DB_CONFIG)
+    cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM varaukset WHERE tila = %s", (id,))
     count = cursor.fetchone()[0]
-    if count > 0:
-        return "Warning: Deleting this tila will also delete any associated varaus."
+    if count > 0 and not force:
+        return "Varoitus: Poistamalla tämän tilan, poistat myös sen varaukset."
+    elif force:
+        cursor.execute("DELETE FROM varaukset WHERE tila = %s", (id,))
     cursor.execute("DELETE FROM tilat WHERE id = %s", (id,))
     conn.commit()
     cursor.close()
     conn.close()
     return None
 
-def delete_varaaja(id):
+def delete_varaaja(id, force=False):
     conn = mysql.connector.connect(**DB_CONFIG)
     cursor = conn.cursor()
-    # Check if there are any existing varaukset for the varaaja
     cursor.execute("SELECT COUNT(*) FROM varaukset WHERE varaaja = %s", (id,))
     count = cursor.fetchone()[0]
-    if count > 0:
-        return "Warning: Deleting this varaaja will also delete any associated varaus."
+
+    if count > 0 and not force:
+        return "Varoitus: Poistamalla tämän varaajan, poistat myös hänen varaukset."
+    elif force:
+        cursor.execute("DELETE FROM varaukset WHERE varaaja = %s", (id,))
+    
     cursor.execute("DELETE FROM varaajat WHERE id = %s", (id,))
     conn.commit()
     cursor.close()
     conn.close()
     return None
+
+def delete_varaus(varaus_id):
+    conn = mysql.connector.connect(**DB_CONFIG)
+    cursor = conn.cursor()
+
+    # Check for existing bookings
+    cursor.execute("SELECT COUNT(*) FROM varaukset WHERE id = %s", (varaus_id,))
+    has_booking = cursor.fetchone()[0]
+
+    if has_booking > 0:
+        # Confirm deletion
+        cursor.execute("DELETE FROM varaukset WHERE id = %s", (varaus_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return True  # Successfully deleted varaus
+    else:
+        cursor.close()
+        conn.close()
+        return False  # No varaus found

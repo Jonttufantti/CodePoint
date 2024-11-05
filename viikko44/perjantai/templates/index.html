@@ -56,6 +56,7 @@
       </thead>
       <tbody></tbody>
     </table>
+
     <h2>Add Tila</h2>
     <form id="add-tila-form">
       <input type="text" id="new-tila" placeholder="Tilan Nimi" required />
@@ -66,6 +67,19 @@
     <form id="add-varaa-form">
       <input type="text" id="new-varaa" placeholder="Nimi" required />
       <button type="submit">Add Varaaja</button>
+    </form>
+
+    <h2>Add Varaus</h2>
+    <form id="add-varaus-form">
+      <input type="number" id="varaus-tila-id" placeholder="Tila ID" required />
+      <input
+        type="number"
+        id="varaus-varaa-id"
+        placeholder="Varaaja ID"
+        required
+      />
+      <input type="date" id="varaus-pv" required />
+      <button type="submit">Add Varaus</button>
     </form>
 
     <h2>Delete Tila</h2>
@@ -81,112 +95,168 @@
     />
     <button id="delete-varaa">Delete Varaaja</button>
 
+    <h2>Delete Varaus</h2>
+    <input
+      type="number"
+      id="delete-varaus-id"
+      placeholder="Varaus ID"
+      required
+    />
+    <button id="delete-varaus">Delete Varaus</button>
+
     <script>
-      // Fetch data from the server
-      fetch("/data")
-        .then((response) => response.json())
-        .then((data) => {
-          const tilatBody = document
-            .getElementById("tilat-table")
-            .getElementsByTagName("tbody")[0];
-          data.tilat.forEach((tila) => {
-            const row = tilatBody.insertRow();
-            row.insertCell(0).textContent = tila.id;
-            row.insertCell(1).textContent = tila.tilan_nimi;
+          // Fetch data from the server
+          fetch("/data")
+              .then((response) => response.json())
+              .then((data) => {
+                  const tilatBody = document.getElementById("tilat-table").getElementsByTagName("tbody")[0];
+                  data.tilat.forEach((tila) => {
+                      const row = tilatBody.insertRow();
+                      row.insertCell(0).textContent = tila.id;
+                      row.insertCell(1).textContent = tila.tilan_nimi;
+                  });
+
+                  const varaajatBody = document.getElementById("varaajat-table").getElementsByTagName("tbody")[0];
+                  data.varaajat.forEach((varaaja) => {
+                      const row = varaajatBody.insertRow();
+                      row.insertCell(0).textContent = varaaja.id;
+                      row.insertCell(1).textContent = varaaja.nimi;
+                  });
+
+                  const varauksetBody = document.getElementById("varaukset-table").getElementsByTagName("tbody")[0];
+                  data.varaukset.forEach((varaus) => {
+                      const row = varauksetBody.insertRow();
+                      row.insertCell(0).textContent = varaus.id;
+                      row.insertCell(1).textContent = varaus.tila;
+                      row.insertCell(2).textContent = varaus.varaaja;
+                      row.insertCell(3).textContent = varaus.varauspaiva;
+                  });
+              });
+
+          document.getElementById("add-tila-form").addEventListener("submit", function (e) {
+              e.preventDefault();
+              const tila = document.getElementById("new-tila").value;
+              fetch("/add_tila", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ tilan_nimi: tila }),
+              })
+                  .then((response) => response.json())
+                  .then((data) => {
+                      console.log(data);
+                      location.reload(); // Reload to see changes
+                  });
           });
 
-          const varaajatBody = document
-            .getElementById("varaajat-table")
-            .getElementsByTagName("tbody")[0];
-          data.varaajat.forEach((varaaja) => {
-            const row = varaajatBody.insertRow();
-            row.insertCell(0).textContent = varaaja.id;
-            row.insertCell(1).textContent = varaaja.nimi;
+          document.getElementById("add-varaa-form").addEventListener("submit", function (e) {
+              e.preventDefault();
+              const varaaja = document.getElementById("new-varaa").value;
+              fetch("/add_varaaja", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ nimi: varaaja }),
+              })
+                  .then((response) => response.json())
+                  .then((data) => {
+                      console.log(data);
+                      location.reload(); // Reload to see changes
+                  });
           });
 
-          const varauksetBody = document
-            .getElementById("varaukset-table")
-            .getElementsByTagName("tbody")[0];
-          data.varaukset.forEach((varaus) => {
-            const row = varauksetBody.insertRow();
-            row.insertCell(0).textContent = varaus.id;
-            row.insertCell(1).textContent = varaus.tila;
-            row.insertCell(2).textContent = varaus.varaaja;
-            row.insertCell(3).textContent = varaus.varauspaiva;
+          document.getElementById("add-varaus-form").addEventListener("submit", function (e) {
+              e.preventDefault();
+              const tilaId = document.getElementById("varaus-tila-id").value;
+              const varaajaId = document.getElementById("varaus-varaa-id").value;
+              const varauspaiva = document.getElementById("varaus-pv").value;
+              fetch("/add_varaus", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ tila_id: tilaId, varaaja_id: varaajaId, varauspaiva: varauspaiva }),
+              })
+                  .then((response) => response.json())
+                  .then((data) => {
+                      console.log(data);
+                      location.reload(); // Reload to see changes
+                  });
           });
-        });
 
-      document
-        .getElementById("add-tila-form")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-          const tila = document.getElementById("new-tila").value;
-          fetch("/add_tila", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ tilan_nimi: tila }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data);
-              location.reload(); // Reload to see changes
-            });
-        });
+          // Helper function to confirm deletion with warning
+      function confirmDeletion(message) {
+          return confirm(message + "\nHaluatko jatkaa?");
+      }
 
-      document
-        .getElementById("add-varaa-form")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-          const varaaja = document.getElementById("new-varaa").value;
-          fetch("/add_varaaja", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nimi: varaaja }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data);
-              location.reload(); // Reload to see changes
-            });
-        });
-
-      document
-        .getElementById("delete-tila")
-        .addEventListener("click", function () {
+      document.getElementById("delete-tila").addEventListener("click", function () {
           const tilaId = document.getElementById("delete-tila-id").value;
           fetch("/delete_tila", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: tilaId }),
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: tilaId }),
           })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data);
+          .then((response) => response.json())
+          .then((data) => {
               if (data.warning) {
-                alert(data.warning);
+                  // If there's a warning, confirm with the user
+                  if (confirmDeletion(data.warning)) {
+                      // Send a follow-up request to force delete
+                      fetch("/delete_tila", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ id: tilaId, force: true }),
+                      })
+                      .then((response) => response.json())
+                      .then(() => location.reload());
+                  }
+              } else {
+                  location.reload();
               }
-              location.reload(); // Reload to see changes
-            });
-        });
+          });
+      });
 
-      document
-        .getElementById("delete-varaa")
-        .addEventListener("click", function () {
+      document.getElementById("delete-varaa").addEventListener("click", function () {
           const varaajaId = document.getElementById("delete-varaa-id").value;
           fetch("/delete_varaaja", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: varaajaId }),
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: varaajaId }),
           })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data);
+          .then((response) => response.json())
+          .then((data) => {
               if (data.warning) {
-                alert(data.warning);
+                  // Confirm with the user before force deletion
+                  if (confirmDeletion(data.warning)) {
+                      // Send a follow-up request to force delete
+                      fetch("/delete_varaaja", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ id: varaajaId, force: true }),
+                      })
+                      .then((response) => response.json())
+                      .then(() => location.reload());
+                  }
+              } else {
+                  location.reload();
               }
-              location.reload(); // Reload to see changes
-            });
-        });
+          });
+      });
+
+          document.getElementById("delete-varaus").addEventListener("click", function () {
+              const varausId = document.getElementById("delete-varaus-id").value;
+              fetch("/delete_varaus", {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ id: varausId }),
+              })
+                  .then((response) => response.json())
+                  .then((data) => {
+                      alert(data.message); // Show confirmation message
+                      location.reload(); // Reload to see changes
+                  })
+                  .catch((error) => {
+                      console.error("Error deleting varaus:", error);
+                  });
+          });
     </script>
   </body>
 </html>
