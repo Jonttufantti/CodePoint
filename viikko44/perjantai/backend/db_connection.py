@@ -1,8 +1,11 @@
 import mysql.connector
-from config.settings import DB_CONFIG
 
-
-
+DB_CONFIG = {
+    "host": "localhost",
+    "user": "root",
+    "password": "",
+    "database": "tilavaraus"
+}
 
 def fetch_users():
     conn = mysql.connector.connect(**DB_CONFIG)
@@ -11,7 +14,6 @@ def fetch_users():
     users = cursor.fetchall()
     cursor.close()
     conn.close()
-    print("Fetched Users:", users)
     return users
 
 def fetch_tilat():
@@ -21,7 +23,6 @@ def fetch_tilat():
     tilat = cursor.fetchall()
     cursor.close()
     conn.close()
-    print("Fetched rooms:", tilat)
     return tilat
 
 def fetch_varaukset():
@@ -40,7 +41,12 @@ def fetch_varaukset():
         INNER JOIN 
             varaajat ON varaukset.varaaja = varaajat.id
     """)
+
     varaukset = cursor.fetchall()
+
+    for varaus in varaukset:
+        varaus['varauspaiva'] = varaus['varauspaiva'].strftime('%Y-%m-%d')
+
     cursor.close()
     conn.close()
     return varaukset
