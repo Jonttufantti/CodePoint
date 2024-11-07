@@ -228,34 +228,32 @@
       });
     });
 
-      document
-        .getElementById("delete-varaa")
-        .addEventListener("click", function () {
-          const varaajaId = document.getElementById("delete-varaa-id").value;
-          fetch("/delete_varaaja", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: varaajaId }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.warning) {
-                // Confirm with the user before force deletion
-                if (confirmDeletion(data.warning)) {
-                  // Send a follow-up request to force delete
-                  fetch("/delete_varaaja", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ id: varaajaId, force: true }),
-                  })
-                    .then((response) => response.json())
-                    .then(() => location.reload());
-                }
-              } else {
-                location.reload();
-              }
-            });
-        });
+    document.getElementById("delete-varaa").addEventListener("click", function () {
+    const varaajaId = document.getElementById("delete-varaa-id").value;
+
+    fetch(`/delete_varaaja/${varaajaId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.warning) {
+            // Confirm with the user before proceeding with force deletion
+            if (confirm(data.warning + "\nHaluatko jatkaa?")) {
+                // Send a follow-up request to force delete
+                fetch(`/delete_varaaja/${varaajaId}?force=true`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" }
+                })
+                .then((response) => response.json())
+                .then(() => location.reload());
+            }
+        } else {
+            location.reload();
+        }
+    });
+});
+
 
       document
         .getElementById("delete-varaus")

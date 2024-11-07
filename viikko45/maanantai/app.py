@@ -129,6 +129,19 @@ class MyHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(b'{"message": "Varaaja deleted"}')
 
+        elif parsed_path.path.startswith("/delete_varaus/"):
+            varaus_id = parsed_path.path.split("/delete_varaus/")[1]
+            deleted = delete_varaus(int(varaus_id))  # Call the delete_varaus function
+            if deleted:
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b'{"message": "Varaus deleted"}')
+            else:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b'{"message": "No varaus found with that ID"}')
+
+
         else:
             self.send_response(404)
             self.end_headers()
