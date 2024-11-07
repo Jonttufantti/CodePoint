@@ -10,8 +10,9 @@ from backend.db_connection import (
     add_varaus,
     delete_tila,
     delete_varaaja,
-    delete_varaus
+    delete_varaus,
 )
+
 
 class MyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -62,7 +63,6 @@ class MyHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"404 - Not Found")
 
-
     def do_POST(self):
         parsed_path = urlparse(self.path)
         if parsed_path.path == "/add_tila":
@@ -98,40 +98,43 @@ class MyHandler(BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
-            self.wfile.write(b'404 - Not Found')
+            self.wfile.write(b"404 - Not Found")
 
     def do_DELETE(self):
         parsed_path = urlparse(self.path)
+        query_params = parse_qs(parsed_path.query)  # Extract query parameters
+        force = 'force' in query_params and query_params['force'][0].lower() == 'true'
+
         if parsed_path.path.startswith("/delete_tila/"):
             tila_id = parsed_path.path.split("/delete_tila/")[1]
-            warning = delete_tila(int(tila_id))
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(json.dumps({"warning": warning}).encode())
+            warning = delete_tila(int(tila_id), force)  # Pass force flag to delete_tila function
+            if warning:
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(json.dumps({"warning": warning}).encode())
+            else:
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b'{"message": "Tila deleted"}')
 
         elif parsed_path.path.startswith("/delete_varaaja/"):
             varaaja_id = parsed_path.path.split("/delete_varaaja/")[1]
-            warning = delete_varaaja(int(varaaja_id))
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(json.dumps({"warning": warning}).encode())
-
-        elif parsed_path.path.startswith("/delete_varaus/"):
-            varaus_id = parsed_path.path.split("/delete_varaus/")[1]
-            deleted = delete_varaus(int(varaus_id))
-            if deleted:
+            warning = delete_varaaja(int(varaaja_id), force)
+            if warning:
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write(b'{"message": "Varaus deleted"}')
+                self.wfile.write(json.dumps({"warning": warning}).encode())
             else:
-                self.send_response(400)
+                self.send_response(200)
                 self.end_headers()
-                self.wfile.write(b'{"message": "No varaus found with that ID"}')
+                self.wfile.write(b'{"message": "Varaaja deleted"}')
 
         else:
             self.send_response(404)
             self.end_headers()
             self.wfile.write(b'404 - Not Found')
+
+
 
 
 server = HTTPServer(("localhost", 8000), MyHandler)

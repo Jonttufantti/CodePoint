@@ -83,15 +83,20 @@ def delete_tila(id, force=False):
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM varaukset WHERE tila = %s", (id,))
     count = cursor.fetchone()[0]
+
     if count > 0 and not force:
         return "Varoitus: Poistamalla tämän tilan, poistat myös sen varaukset."
     elif force:
+        # Force delete associated varaukset first
         cursor.execute("DELETE FROM varaukset WHERE tila = %s", (id,))
+    
+    # Proceed with deleting the tila
     cursor.execute("DELETE FROM tilat WHERE id = %s", (id,))
     conn.commit()
     cursor.close()
     conn.close()
     return None
+
 
 def delete_varaaja(id, force=False):
     conn = mysql.connector.connect(**DB_CONFIG)
@@ -102,8 +107,10 @@ def delete_varaaja(id, force=False):
     if count > 0 and not force:
         return "Varoitus: Poistamalla tämän varaajan, poistat myös hänen varaukset."
     elif force:
+        # Force delete associated varaukset first
         cursor.execute("DELETE FROM varaukset WHERE varaaja = %s", (id,))
     
+    # Proceed with deleting the varaaja
     cursor.execute("DELETE FROM varaajat WHERE id = %s", (id,))
     conn.commit()
     cursor.close()
@@ -114,12 +121,12 @@ def delete_varaus(varaus_id):
     conn = mysql.connector.connect(**DB_CONFIG)
     cursor = conn.cursor()
 
-    # Check for existing bookings
+    # Check for existing bookings (varaus)
     cursor.execute("SELECT COUNT(*) FROM varaukset WHERE id = %s", (varaus_id,))
     has_booking = cursor.fetchone()[0]
 
     if has_booking > 0:
-        # Confirm deletion
+        # Proceed with deleting the varaus if it exists
         cursor.execute("DELETE FROM varaukset WHERE id = %s", (varaus_id,))
         conn.commit()
         cursor.close()
