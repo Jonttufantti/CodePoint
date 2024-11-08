@@ -16,6 +16,7 @@ from backend.db_connection import (
 
 class MyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        # Handle the root path to serve index.html
         if self.path == "/":
             self.send_response(200)
             self.send_header("Content-Type", "text/html")
@@ -23,19 +24,32 @@ class MyHandler(BaseHTTPRequestHandler):
             with open("templates/index.html", "rb") as f:
                 self.wfile.write(f.read())
 
+        # General case for handling .html pages
+        elif self.path.endswith(".html"):
+            page = self.path[1:]  # Remove the leading slash
+            try:
+                with open(f"templates/{page}", "rb") as f:
+                    self.send_response(200)
+                    self.send_header("Content-Type", "text/html")
+                    self.end_headers()
+                    self.wfile.write(f.read())
+            except FileNotFoundError:
+                self.send_response(404)
+                self.send_header("Content-Type", "text/html")
+                self.end_headers()
+                self.wfile.write(b"404 - Not Found")
+
         elif self.path == "/data":
             tilat = fetch_tilat()
             users = fetch_users()
             varaukset = fetch_varaukset()
-
-            # Create a response JSON
             response = {"tilat": tilat, "varaajat": users, "varaukset": varaukset}
-
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps(response).encode())
 
+        # API endpoints
         elif self.path == "/tilat":
             tilat = fetch_tilat()
             self.send_response(200)
@@ -59,7 +73,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         else:
             self.send_response(404)
-            self.send_header("Content-type", "text/html")
+            self.send_header("Content-Type", "text/html")
             self.end_headers()
             self.wfile.write(b"404 - Not Found")
 
@@ -102,12 +116,12 @@ class MyHandler(BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         parsed_path = urlparse(self.path)
-        query_params = parse_qs(parsed_path.query)  # Extract query parameters
+        query_params = parse_qs(parsed_path.query)
         force = 'force' in query_params and query_params['force'][0].lower() == 'true'
 
         if parsed_path.path.startswith("/delete_tila/"):
             tila_id = parsed_path.path.split("/delete_tila/")[1]
-            warning = delete_tila(int(tila_id), force)  # Pass force flag to delete_tila function
+            warning = delete_tila(int(tila_id), force)
             if warning:
                 self.send_response(200)
                 self.end_headers()
@@ -131,7 +145,7 @@ class MyHandler(BaseHTTPRequestHandler):
 
         elif parsed_path.path.startswith("/delete_varaus/"):
             varaus_id = parsed_path.path.split("/delete_varaus/")[1]
-            deleted = delete_varaus(int(varaus_id))  # Call the delete_varaus function
+            deleted = delete_varaus(int(varaus_id))
             if deleted:
                 self.send_response(200)
                 self.end_headers()

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Varaajat</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Varaajat</h1>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="tilat.html">Tilat</a>
+        <a href="varaukset.html">Varaukset</a>
+    </nav>
+
+    <table id="varaajat-table">
+        <thead>
+            <tr><th>ID</th><th>Nimi</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>Add Varaaja</h2>
+    <form id="add-varaa-form">
+        <input type="text" id="new-varaa" placeholder="Nimi" required />
+        <button type="submit">Add Varaaja</button>
+    </form>
+
+    <h2>Delete Varaaja</h2>
+    <input type="number" id="delete-varaa-id" placeholder="Varaaja ID" required />
+    <button id="delete-varaa">Delete Varaaja</button>
+
+    <script>
+        // Fetch Varaajat data
+        fetch("/data")
+            .then(response => response.json())
+            .then(data => {
+                const varaajatBody = document.getElementById("varaajat-table").querySelector("tbody");
+                data.varaajat.forEach(varaaja => {
+                    const row = varaajatBody.insertRow();
+                    row.insertCell(0).textContent = varaaja.id;
+                    row.insertCell(1).textContent = varaaja.nimi;
+                });
+            });
+
+        // Add Varaaja
+        document.getElementById("add-varaa-form").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const varaaja = document.getElementById("new-varaa").value;
+            fetch("/add_varaaja", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nimi: varaaja })
+            }).then(() => location.reload());
+        });
+
+        function confirmDeletion(message) {
+        return confirm(message + "\nHaluatko jatkaa?");
+        }
+
+        // Delete Varaaja
+        document
+        .getElementById("delete-varaa")
+        .addEventListener("click", function () {
+          const varaajaId = document.getElementById("delete-varaa-id").value;
+
+          fetch(`/delete_varaaja/${varaajaId}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.warning) {
+                // Confirm with the user before proceeding with force deletion
+                if (confirm(data.warning + "\nHaluatko jatkaa?")) {
+                  // Send a follow-up request to force delete
+                  fetch(`/delete_varaaja/${varaajaId}?force=true`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                  })
+                    .then((response) => response.json())
+                    .then(() => location.reload());
+                }
+              } else {
+                location.reload();
+              }
+            });
+        });
+
+    </script>
+</body>
+</html>
