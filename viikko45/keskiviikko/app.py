@@ -23,6 +23,7 @@ class MyHandler(BaseHTTPRequestHandler):
             "/login": self.login_page,
             "/logout": self.logout,
             "/": self.home,
+            "/index": self.home,
             "/tilat": self.fetch_tilat,
             "/varaajat": self.fetch_varaajat,
             "/varaukset": self.fetch_varaukset
@@ -32,17 +33,17 @@ class MyHandler(BaseHTTPRequestHandler):
 
         try:
             response = 200
-            cookies = self.parse_cookies(self.headers["Cookie"])
-            if "sid" in cookies:
-                self.user = cookies["sid"] if (cookies["sid"] in sessions) else False
-            else:
-                self.user = False
+            cookies = self.parse_cookies(self.headers.get("Cookie", ""))
+            sid = cookies.get("sid")
+            self.user = sessions.get(sid) if sid in sessions else None
 
-            if not self.user and self.path not in routes:
-                response = 403
-                content = "Access Denied"
-            else:
-                content = routes.get(self.path, self.not_found)()
+            # Check if the user is logged in and not trying to access protected routes
+            if not self.user and self.path not in ["/login"]:
+                self.redirect_to_login()
+                return
+
+            # Serve the requested route
+            content = routes.get(self.path, self.not_found)()
 
         except Exception:
             response = 404
@@ -55,9 +56,8 @@ class MyHandler(BaseHTTPRequestHandler):
             self.send_header('Set-Cookie', self.cookie)
         
         self.end_headers()
-        self.wfile.write(bytes(content, "utf-8"))
+        self.wfile.write(bytes(str(content), "utf-8"))
 
-        # Handle the root path to serve index.html
         if self.path == "/":
             self.send_response(200)
             self.send_header("Content-Type", "text/html")
@@ -82,6 +82,44 @@ class MyHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         parsed_path = urlparse(self.path)
+
+        if parsed_path.path == "/login":
+            # Handle login logic
+            content_length = int(self.headers["Content-Length"])
+            body = self.rfile.read(content_length)
+            data = parse_qs(body.decode("utf-8"))
+
+            username = data.get("username", [None])[0]
+            password = data.get("password", [None])[0]
+
+            if username and password:
+                user = verify_user(username, password)
+                if user:
+                    sid = self.generate_sid()
+                    self.cookie = f"sid={sid}; Path=/; HttpOnly"
+                    sessions[sid] = {"username": username}
+
+                    print("Logging in:", username)
+                    print("Session ID:", sid)
+                    print("Current Sessions:", sessions)
+
+
+                    self.send_response(302)
+                    self.send_header('Location', '/index')
+                    self.send_header('Set-Cookie', self.cookie)
+                    self.end_headers()
+                else:
+                    self.send_response(401)
+                    self.send_header("Content-Type", "text/html")
+                    self.end_headers()
+                    self.wfile.write(b"Invalid credentials")
+
+            else:
+                self.send_response(400)
+                self.send_header("Content-Type", "text/html")
+                self.end_headers()
+                self.wfile.write(b"Missing username or password")
+
         if parsed_path.path == "/add_tila":
             content_length = int(self.headers["Content-Length"])
             body = self.rfile.read(content_length)
@@ -164,9 +202,9 @@ class MyHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b'404 - Not Found')
 
-    
     def home(self):
-        return "Welcome User!" if self.user else "Welcome Stranger!"
+        with open("templates/index.html", "rb") as f:
+            return f.read()
     
     def login_page(self):
         with open("templates/login.html", "rb") as f:
@@ -231,9 +269,13 @@ class MyHandler(BaseHTTPRequestHandler):
         return "".join(str(randint(1,9)) for _ in range(100))
     
     def parse_cookies(self, cookie_list):
-        return dict(((c.split("=")) for c in cookie_list.split(";"))) if cookie_list else {}
+        return {k.strip(): v.strip() for k, v in (c.split("=", 1) for c in cookie_list.split(";") if "=" in c)}
 
 
+    def redirect_to_login(self):
+        self.send_response(302)
+        self.send_header('Location', '/login')
+        self.end_headers()
 
 server = HTTPServer(("localhost", 8000), MyHandler)
 print("Server running on http://localhost:8000")

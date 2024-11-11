@@ -7,24 +7,25 @@ DB_CONFIG = {
     "database": "tilavaraus"
 }
 
-import mysql.connector
-
 def verify_user(username, password):
     connection = mysql.connector.connect(
-        host="localhost", 
-        user="varaus-admin", 
-        password="your_password", 
-        database="tilavaraus"
+        host=DB_CONFIG["host"], 
+        user=DB_CONFIG["user"], 
+        password=DB_CONFIG["password"], 
+        database=DB_CONFIG["database"]
     )
     cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM kayttajat WHERE tunnus = %s", (username,))
+    cursor.execute("SELECT * FROM kayttajat WHERE nimi = %s AND salasana = %s", (username, password))
     user = cursor.fetchone()
-    
+
+    print("Queried user:", user)
+    print("Username:", username)
+    print("Password:", password)
+
     # Check if user exists and passwords match
-    if user and user['salasana'] == password:  # You should hash passwords in production
+    if user and user['salasana'] == password:
         return user
     return None
-
 
 def fetch_users():
     conn = mysql.connector.connect(**DB_CONFIG)
