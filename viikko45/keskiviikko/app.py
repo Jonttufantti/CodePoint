@@ -207,11 +207,21 @@ class MyHandler(BaseHTTPRequestHandler):
             return f.read()
     
     def login_page(self):
-        with open("templates/login.html", "rb") as f:
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html")
+        try:
+            with open("templates/login.html", "rb") as f:
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.end_headers()
+                self.wfile.write(f.read())
+        except FileNotFoundError:
+            self.send_response(404)
             self.end_headers()
-            self.wfile.write(f.read())
+            self.wfile.write(b"404 - Login page not found")
+
+    def redirect_to_login(self):
+        self.send_response(302)
+        self.send_header('Location', '/login')
+        self.end_headers()
 
     def login(self):
         # Handle login logic
@@ -270,12 +280,6 @@ class MyHandler(BaseHTTPRequestHandler):
     
     def parse_cookies(self, cookie_list):
         return {k.strip(): v.strip() for k, v in (c.split("=", 1) for c in cookie_list.split(";") if "=" in c)}
-
-
-    def redirect_to_login(self):
-        self.send_response(302)
-        self.send_header('Location', '/login')
-        self.end_headers()
 
 server = HTTPServer(("localhost", 8000), MyHandler)
 print("Server running on http://localhost:8000")
