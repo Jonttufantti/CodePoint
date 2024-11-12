@@ -32,7 +32,6 @@ class MyHandler(BaseHTTPRequestHandler):
         self.cookie = None
 
         try:
-            response = 200
             cookies = self.parse_cookies(self.headers.get("Cookie", ""))
             sid = cookies.get("sid")
             self.user = sessions.get(sid) if sid in sessions else None
@@ -42,19 +41,17 @@ class MyHandler(BaseHTTPRequestHandler):
                 self.redirect_to_login()
                 return
 
-            # Serve the requested route
+            # Get the content for the requested path, or call not_found() if no match
             content = routes.get(self.path, self.not_found)()
 
         except Exception:
-            response = 404
-            content = "Not Found"
+            content = self.not_found()
    
-        self.send_response(response)
+        # Send response
+        self.send_response(200 if content != "404 Not Found" else 404)
         self.send_header('Content-type','text/html')
-
         if self.cookie:
             self.send_header('Set-Cookie', self.cookie)
-        
         self.end_headers()
         self.wfile.write(bytes(str(content), "utf-8"))
 
