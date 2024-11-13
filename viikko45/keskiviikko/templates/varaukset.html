@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Varaukset</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Varaukset</h1>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="tilat.html">Tilat</a>
+        <a href="varaajat.html">Varaajat</a>
+    </nav>
+
+    <table id="varaukset-table">
+        <thead>
+            <tr><th>ID</th><th>Tila</th><th>Varaaja</th><th>Varauspäivä</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>Add Varaus</h2>
+    <form id="add-varaus-form">
+      <input type="number" id="varaus-tila-id" placeholder="Tila ID" required />
+      <input
+        type="number"
+        id="varaus-varaa-id"
+        placeholder="Varaaja ID"
+        required
+      />
+      <input type="date" id="varaus-pv" required />
+      <button type="submit">Add Varaus</button>
+    </form>
+
+    <h2>Delete Varaus</h2>
+    <input type="number" id="delete-varaus-id" placeholder="Varaus ID" required />
+    <button id="delete-varaus">Delete Varaus</button>
+
+    <script>
+        // Fetch Varaukset data
+        fetch("/data")
+            .then(response => response.json())
+            .then(data => {
+                const varauksetBody = document.getElementById("varaukset-table").querySelector("tbody");
+                data.varaukset.forEach(varaus => {
+                    const row = varauksetBody.insertRow();
+                    row.insertCell(0).textContent = varaus.id;
+                    row.insertCell(1).textContent = varaus.tila;
+                    row.insertCell(2).textContent = varaus.varaaja;
+                    row.insertCell(3).textContent = varaus.varauspäivä;
+                });
+            });
+
+        // Add Varaus
+        document
+        .getElementById("add-varaus-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const tilaId = document.getElementById("varaus-tila-id").value;
+          const varaajaId = document.getElementById("varaus-varaa-id").value;
+          const varauspaiva = document.getElementById("varaus-pv").value;
+          fetch("/add_varaus", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              tila_id: tilaId,
+              varaaja_id: varaajaId,
+              varauspaiva: varauspaiva,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              location.reload(); // Reload to see changes
+            });
+        });
+
+        // Delete Varaus
+        document.getElementById("delete-varaus").addEventListener("click", function () {
+            const varausId = document.getElementById("delete-varaus-id").value;
+            fetch(`/delete_varaus/${varausId}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" }
+            }).then(() => location.reload());
+        });
+    </script>
+</body>
+</html>
