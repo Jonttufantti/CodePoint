@@ -4,10 +4,10 @@ from rest_framework import status
 from .models import Kayttaja, Tilat, Varaajat, Varaukset
 from .serializers import KayttajaSerializer, TilatSerializer, VaraajatSerializer, VarauksetSerializer
 from rest_framework.permissions import IsAuthenticated
-
+from .permissions import IsAdminUser, IsUserOrReadOnly
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsUserOrReadOnly])
 def kayttaja_list(request):
     if request.method == 'GET':
         kayttajat = Kayttaja.objects.all()
@@ -22,7 +22,7 @@ def kayttaja_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def kayttaja_detail(request, pk):
     try:
         kayttaja = Kayttaja.objects.get(pk=pk)
@@ -45,7 +45,7 @@ def kayttaja_detail(request, pk):
         return Response({'message': 'Kayttaja deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsUserOrReadOnly])
 def tilat_list(request):
     if request.method == 'GET':
         tilat = Tilat.objects.all()
@@ -60,7 +60,7 @@ def tilat_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def tilat_detail(request, pk):
     try:
         tila = Tilat.objects.get(pk=pk)
@@ -82,8 +82,9 @@ def tilat_detail(request, pk):
         tila.delete()
         return Response({'message': 'Tila deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
+
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsUserOrReadOnly])
 def varaajat_list(request):
     if request.method == 'GET':
         varaajat = Varaajat.objects.all()
@@ -97,8 +98,9 @@ def varaajat_list(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def varaajat_detail(request, pk):
     try:
         varaaja = Varaajat.objects.get(pk=pk)
@@ -121,8 +123,9 @@ def varaajat_detail(request, pk):
         return Response({'message': 'Varaaja deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 
+
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsUserOrReadOnly])
 def varaukset_list(request):
     if request.method == 'GET':
         varaukset = Varaukset.objects.all()
@@ -136,8 +139,9 @@ def varaukset_list(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def varaukset_detail(request, pk):
     try:
         varaus = Varaukset.objects.get(pk=pk)
