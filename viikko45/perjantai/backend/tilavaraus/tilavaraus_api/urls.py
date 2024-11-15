@@ -17,6 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from tilavaraus.views import kayttaja_list, kayttaja_detail, tilat_list, tilat_detail, varaajat_list, varaajat_detail, varaukset_list, varaukset_detail
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
